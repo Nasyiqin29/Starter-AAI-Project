@@ -1,1 +1,14 @@
 @import "tailwindcss";
+
+/* Budiman HRMS palette — design spec §8 (reference: image/login design.jpg). */
+@theme {
+  --color-cream: #f6f1ea;
+  --color-ink: #1d1145;
+  --color-brand: #6c3fe0;
+  --color-brand-dark: #5730c0;
+  --color-coral: #e8604c;
+  --color-coral-light: #f07b68;
+  --color-muted: #6b6580;
+  --color-line: #e5e0d8;
+  --color-field: #d8d2e4;
+}
