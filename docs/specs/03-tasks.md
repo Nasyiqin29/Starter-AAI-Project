@@ -15,13 +15,13 @@ until its own spec exists. When that spec is agreed, add its tasks below Task 7.
 
 | Status | # | Task | Priority | Checks (from requirements §4) |
 |--------|---|------|----------|-------------------------------|
-| To do | 1 | Database and the users table | High | — (design §1; sets up AC-08/09) |
-| To do | 2 | Seed the six demo users | High | AC-08, AC-09 |
-| To do | 3 | Lock the doors: protected pages, session check, header | High | AC-06 (stranger bullet) |
-| To do | 4 | Login form: format check, generic error, lockout | High | AC-02, AC-03, AC-04 (bullets 1–3) |
-| To do | 5 | Success path: session cookie, role homes, logout live | High | AC-01, AC-04 (last bullet), AC-05, AC-06, AC-07 |
-| To do | 6 | Security pass | High | AC-05, design §6 review |
-| To do | 7 | Full acceptance walk and commit | High | AC-01 … AC-09 |
+| Done | 1 | Database and the users table | High | — (design §1; sets up AC-08/09) |
+| Done | 2 | Seed the six demo users | High | AC-08, AC-09 |
+| Done | 3 | Lock the doors: protected pages, session check, header | High | AC-06 (stranger bullet) |
+| Done | 4 | Login form: format check, generic error, lockout | High | AC-02, AC-03, AC-04 (bullets 1–3) |
+| Done | 5 | Success path: session cookie, role homes, logout live | High | AC-01, AC-04 (last bullet), AC-05, AC-06, AC-07 |
+| Done | 6 | Security pass | High | AC-05, design §6 review |
+| Done | 7 | Full acceptance walk and commit | High | AC-01 … AC-09 |
 
 ---
 
@@ -36,7 +36,7 @@ until its own spec exists. When that spec is agreed, add its tasks below Task 7.
 
 - **Goal:** `npm run db:seed` loads exactly the six people from design Reference B, with `password123` stored as a bcrypt hash; re-running it does not duplicate anyone.
 - **Files:** `prisma/seed.ts`, `package.json` (add the `db:seed` script)
-- **Check:** AC-08 and AC-09 as written: run the seed, open `npx prisma studio` → 6 rows, each password starts with `$2a$` and nowhere equals `password123`, `supervisor-2` and `hr-2` match the Reference B row; run the seed twice — still 6 rows.
+- **Check:** AC-08 and AC-09 as written: run the seed, open `npx prisma studio` → 6 rows, each password starts with `$2a$` or `$2b$` and nowhere equals `password123`, `supervisor-2` and `hr-2` match the Reference B row; run the seed twice — still 6 rows.
 - **Traces:** U8, AC-08, AC-09; design rule 4, rule 9, Reference B; HRMS doc 7.2 demo table (all six accounts log in with `password123`).
 
 ## Task 3 – Lock the doors: protected pages, session check, header *(High)*
@@ -72,4 +72,5 @@ until its own spec exists. When that spec is agreed, add its tasks below Task 7.
 - **Goal:** Every acceptance check in `01-requirements.md` §4 is run by hand, in order, and ticked from "To do" to Done; the whole login story is demonstrated end to end; work is committed.
 - **Files:** `docs/specs/01-requirements.md` (tick the ACs), `docs/specs/03-tasks.md` (Status → Done)
 - **Check:** Walk AC-01 → AC-09 exactly as written, using only the six demo accounts. Anything that fails: fix the spec first, then the code (template rule). Commit each task with a Conventional Commits message (`feat: …`, `docs: …`).
+  - *Walk done 20/11/2026: AC-01 … AC-09 all ticked in `01-requirements.md` §4. AC-04's 15-minute wait was verified by advancing the clock in a unit test of the lockout module (restart also clears the counter, per design rule 3). Commits were held back on request — commit when asked.*
 - **Traces:** All of requirements §4; HRMS doc §8 step 6 ("Check"); AGENTS.md commit rule.

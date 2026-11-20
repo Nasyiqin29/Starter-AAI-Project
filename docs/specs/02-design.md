@@ -77,6 +77,8 @@ story U5 is testable from any screen.
 | `src/lib/auth/roles.ts` | The four roles, their home routes, and their allowed routes — one place to look up "who may open what" |
 | `src/lib/auth/lockout.ts` | In-memory fail counter and 15-minute lock (rule 3) |
 | `src/lib/validate.ts` | `isWorkEmail` (`@budiman.com`), `isIcNumber` (`xx-xxxxxx`), trim helpers |
+| `src/app/globals.css` | Tailwind import; the `@theme` palette tokens of §8 |
+| `src/components/home-shell.tsx` | Presentational shell shared by the four role homes (card, serif greeting, notice banner — §8); contains no checks of its own |
 | `src/app/layout.tsx` | Root layout; Tailwind import; renders the shared header only when a session exists |
 | `src/app/page.tsx` | `/` — the redirect of rule 7 |
 | `src/app/login/page.tsx` | The `/login` form |
@@ -108,6 +110,59 @@ check — `requireUser` in each page/action is the check (rule 6).
 | `npm run db:seed` | Load the six demo accounts (AC-08, AC-09 run against this) |
 | `npx prisma studio` | Open the database in the browser — how to check AC-08/AC-09 by hand |
 | `npm run dev` | Start the app at http://localhost:3000 |
+
+## 8. Look and feel
+
+Agreed 20/11/2026: the screens follow the attached reference
+(`image/login design.jpg` — a cream/purple/coral marketing login) for
+**layout, colours and spacing only**. No behaviour changes: the same server
+actions, form fields, message strings (Reference A) and access rules of §4
+still apply. The reference's artwork (Vanta's llama) is **not** shipped;
+the right-hand panel is recreated as pure-CSS coral blobs, and no external
+images are used.
+
+**Palette** (Tailwind v4 `@theme` tokens in `src/app/globals.css`):
+
+| Token | Hex | Used for |
+|-------|-----|----------|
+| `cream` | `#F6F1EA` | page background, header background |
+| `ink` | `#1D1145` | headings, body text, wordmark |
+| `brand` | `#6C3FE0` (hover `#5730C0`) | primary submit button |
+| `coral` | `#E8604C` (light `#F07B68`) | decorative blobs on `/login` |
+| `muted` | `#6B6580` | secondary text (emails, placeholder lines) |
+| `line` | `#E5E0D8` | hairline borders (cards, header) |
+| `field` | `#D8D2E4` | form input borders |
+
+**Typography:** headings use the system serif stack (Tailwind `font-serif`),
+large and tight — mirroring the reference's serif "Welcome back!"; body and
+form text stay sans-serif, small (`text-sm`/`text-xs`).
+
+**Login screen (`/login`):** full-height two-column split.
+- Left (≈55%): wordmark "Budiman HRMS" top-left in `ink`; below it the serif
+  heading "Welcome back!" (`text-4xl`/`text-5xl`), and under that a white
+  card (`max-w-sm`, `rounded-xl`, hairline `line` border, soft shadow, `p-6`)
+  titled "Sign into Budiman HRMS" with the quiet note from §4, the message
+  banners, the Email + Password fields (small labels, `rounded-md` inputs,
+  `field` border, purple focus ring) and one full-width purple button
+  labelled "Log in".
+- Right (≈45%, `md:` and up only): `aria-hidden` coral blobs — organic
+  `border-radius` shapes bleeding off the edge, echoing the reference's
+  scalloped panel. Decorative only, no images, no text.
+- On small screens the right panel disappears and the card centres on cream.
+
+**Home screens (four role homes):** same cream page; the greeting "Hello,
+{name}." becomes a serif `ink` heading inside a centred white card
+(`max-w-2xl`, `rounded-xl`, `p-8`), the placeholder line in `muted` below it.
+The forbidden notice sits above the card (soft coral banner, exact Reference A
+wording). The shared header matches: cream background, hairline bottom
+border, `ink` wordmark + `muted` name/email, "Log out" as a quiet
+outline button. Implemented by the shared presentational component
+`src/components/home-shell.tsx` — pages keep their own `requireUser` and
+database checks.
+
+**Spacing rhythm:** generous — outer padding `px-8`/`px-10`, card padding
+`p-6`/`p-8`, form fields stacked with `gap-4`, corner radius `rounded-xl`
+for cards and `rounded-md` for inputs and buttons.
 
 ---
 
