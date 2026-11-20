@@ -22,4 +22,49 @@ model User {
   division     String // one of the divisions in design Reference A
   designation  String // job title from the division's list
   createdAt    DateTime @default(now())
+  // Leave module (flow design §9): Annual days allowed per calendar year.
+  annualLeaveEntitlement Int @default(14)
+
+  requestsMade    LeaveRequest[] @relation("EmployeeRequests")
+  requestsToSign  LeaveRequest[] @relation("SupervisorRequests")
+  requestsDecided LeaveRequest[] @relation("HrDecided")
+}
+
+/// The leave form's pick-list — the fixed seeded list of flow design §9.
+/// The Admin does not manage this table (document 5.3 rule 6); the seed is
+/// the only writer.
+model LeaveType {
+  id        Int   @id @default(autoincrement())
+  name      String @unique // exactly one of the five names in design Reference C
+  sortOrder Int // order on the form's dropdown (1-5)
+  active    Boolean @default(true)
+
+  requests LeaveRequest[]
+}
+
+/// One row per leave request — flow design §9. The days count is never
+/// stored: src/lib/leave/days.ts computes it from start/end/halfDay.
+model LeaveRequest {
+  id               Int       @id @default(autoincrement())
+  employeeId       Int // who is asking (Employee, or a Supervisor asking for themselves)
+  supervisorId     Int? // the supervisor who must sign; null only for a Supervisor's own request (rule 4)
+  leaveTypeId      Int // one of the five seeded types
+  otherLeaveType   String? // required when type is Other (rule 9)
+  reason           String? // required when type is Compassionate leave (rule 9); <= 500 chars, trimmed
+  startDate        DateTime // end >= start (rule 8); past dates allowed
+  endDate          DateTime
+  halfDay          String? // null = full days; "Morning" | "Afternoon", only when start = end (rule 7)
+  status           String // one of the seven values in flow design §10
+  supervisorRemark String? // required when Rejected by supervisor (rule 6)
+  hrOfficerId      Int? // the HR officer who decided — set when Approved / Rejected by HR
+  hrRemark         String? // required when Rejected by HR (rule 6)
+  submittedAt      DateTime  @default(now())
+  signedAt         DateTime?
+  decidedAt        DateTime?
+  cancelledAt      DateTime?
+
+  employee   User      @relation("EmployeeRequests", fields: [employeeId], references: [id])
+  supervisor User?     @relation("SupervisorRequests", fields: [supervisorId], references: [id])
+  hrOfficer  User?     @relation("HrDecided", fields: [hrOfficerId], references: [id])
+  leaveType  LeaveType @relation(fields: [leaveTypeId], references: [id])
 }

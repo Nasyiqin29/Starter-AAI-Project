@@ -10,6 +10,17 @@ const prisma = new PrismaClient();
 
 const DEMO_PASSWORD = "password123";
 const BCRYPT_COST = 10; // design rule 4
+const ANNUAL_ENTITLEMENT = 14; // flow design §9/Reference D: 14 days for everyone
+
+// Exactly the fixed list in flow design Reference C. The seed is the only
+// writer of this table — the Admin is view-only (document 5.3 rule 6).
+const LEAVE_TYPES: { name: string; sortOrder: number }[] = [
+  { name: "Annual leave", sortOrder: 1 },
+  { name: "Maternity leave", sortOrder: 2 },
+  { name: "Unpaid leave", sortOrder: 3 },
+  { name: "Compassionate leave", sortOrder: 4 },
+  { name: "Other", sortOrder: 5 },
+];
 
 type DemoUser = {
   email: string;
@@ -86,13 +97,30 @@ async function main() {
         role: user.role,
         division: user.division,
         designation: user.designation,
+        annualLeaveEntitlement: ANNUAL_ENTITLEMENT,
       },
-      create: { ...user, email, passwordHash },
+      create: {
+        ...user,
+        email,
+        passwordHash,
+        annualLeaveEntitlement: ANNUAL_ENTITLEMENT,
+      },
+    });
+  }
+
+  for (const type of LEAVE_TYPES) {
+    await prisma.leaveType.upsert({
+      where: { name: type.name },
+      update: { sortOrder: type.sortOrder, active: true },
+      create: { ...type, active: true },
     });
   }
 
   const count = await prisma.user.count();
-  console.log(`Seeded 6 demo users (password123 stored hashed). Users in database: ${count}`);
+  const typeCount = await prisma.leaveType.count();
+  console.log(
+    `Seeded 6 demo users (password123 stored hashed). Users in database: ${count}; leave types: ${typeCount}`,
+  );
 }
 
 main()
