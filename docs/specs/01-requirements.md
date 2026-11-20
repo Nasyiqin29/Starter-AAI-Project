@@ -71,3 +71,101 @@ Everyone who is not logged in starts at `/login`.
 - Changing one's own password (a later module, if ever requested)
 - Anything about leave requests themselves — submission, signing, HR decisions and the admin view are the next spec files, not this one
 - Styling beyond plain Tailwind defaults
+
+---
+
+# Leave Request — Flow – Requirements
+
+> **This section answers:** What must the leave request flow do, and why?
+> **Who:** The AI drafted it from `docs/Agentic AI - HRMS Doc.pdf` sections 4–6
+> and 7.2 plus the flow interview (20/11/2026). You review it.
+>
+> The document wins wherever it speaks (five leave types, the two-stage
+> supervisor→HR flow); the interview fills its gaps (day counting, half-days,
+> cancellation, editing, balances, notifications). Items marked *(Extra)* go
+> beyond section 6 and follow FR-09: this spec first, and never above the
+> priority of what the document itself asks (Medium or Low in tasks).
+>
+> Correction recorded 20/11/2026: the first interview round was based on a
+> mis-summarised document (four types, single-stage approval, certificates).
+> The document is authoritative: types are the five in Reference C, the flow
+> is two-stage, and there is no doctor's certificate anywhere in this module.
+
+## 6. The problem
+
+Budiman still processes leave on paper: the employee fills a form, the
+supervisor signs it, and HR copies it into a spreadsheet by hand. Forms get
+lost or delayed, employees cannot see where their request is, and HR has no
+single list of requests waiting for a decision (document §2). This module
+replaces the whole paper chain, from submission to decision, inside the app
+login already protects.
+
+This module provides:
+
+1. A submission form — leave type, start/end dates, half-day if needed,
+   reason, and a supervisor chosen from the employee's own division (FR-02)
+2. A supervisor queue — sign or reject what is sent to you; a rejection needs
+   a remark (FR-03)
+3. A send-to-HR step — after signing, the employee moves their own request
+   into the shared HR queue (FR-04)
+4. An HR queue — either HR officer approves or rejects; a rejection needs a
+   remark; the officer who decides is recorded (FR-05)
+5. Current and past lists for every role, with status and remarks (FR-06)
+6. Confirmation before every action and a success message after it (FR-07)
+7. A view-only list of every record for the Admin (FR-08)
+
+## 7. Who uses it (roles)
+
+| Role | In the flow |
+|------|-------------|
+| **Employee** | Submits their own requests, tracks them, sends Signed ones to HR, cancels/withdraws, edits Pending ones, resubmits Rejected ones |
+| **Supervisor** | Signs or rejects requests routed to them — never their own; their own requests go to the HR queue instead (L8) |
+| **HR** | Approves or rejects from the Pending HR queue — either officer may decide, and the decider is recorded. HR staff do not hold leave requests themselves (document 5.3 rule 2) |
+| **Admin** | Sees every request, changes nothing (document 5.3 rule 6) |
+
+## 8. User stories
+
+- **L1. Submit a request** *(High — FR-02)*. As an Employee, I submit a leave request — type, start and end dates, half-day if needed, a reason — and choose a supervisor **from my own division**, so it lands with someone who actually oversees me.
+- **L2. Sign or reject** *(High — FR-03)*. As a Supervisor, I sign or reject requests sent to me; a rejection requires a remark so the employee can see why.
+- **L3. Send to HR** *(High — FR-04)*. As an Employee, once my request is Signed I send it to the shared HR queue myself — the same as handing the signed paper form to HR.
+- **L4. HR decision** *(High — FR-05)*. As an HR officer, I approve or reject requests in the HR queue; a rejection requires a remark; the system records which officer decided, so the audit trail is real.
+- **L5. See status and remarks** *(High — FR-06)*. As any role, I see the current and past requests that concern me, with their status and remarks, so nothing gets lost and nobody has to ask.
+- **L6. Confirm, then know it worked** *(High — FR-07)*. As any role, every action that decides or changes something asks for confirmation first and shows a clear success message after, so a mis-click cannot decide a request and I always know what happened.
+- **L7. Admin view-only** *(Medium — FR-08)*. As the Admin, I see every leave record with its status and remarks — and I change nothing.
+- **L8. Supervisor's own leave** *(Medium — Extra; a documented deviation from document 5.3 rules 2 and 4, which say only Employees apply and every request sees a supervisor first — a supervisor has no supervisor, so HR decides instead)*. As a Supervisor, my own request goes straight to the HR queue for HR to decide — no one signs their own request.
+- **L9. Cancel and withdraw** *(Medium — Extra)*. As an Employee, I cancel a request while nobody has decided it, and withdraw an Approved one before its start date, so mistakes can be undone.
+- **L10. Edit and resubmit** *(Medium — Extra)*. As an Employee, I edit a request before it is signed, and fix-and-resubmit a rejected one (back to my supervisor), so a small mistake is not a dead end.
+- **L11. Days count as working days** *(Medium — Extra)*. As an Employee, weekends never count against me: Friday–Monday is 2 days, not 4, and a morning or afternoon half-day counts as 0.5.
+- **L12. Annual leave balance** *(Low — Extra, FR-09)*. As the company, Annual leave requests that would exceed the employee's remaining entitlement this year (14 days by default) are blocked; the other four types are uncapped.
+- **L13. Email notifications** *(Low — Extra, FR-09)*. As a Supervisor or Employee, I also get an email when a request lands in my queue or a decision is made on mine — logged to the dev console until Budiman provides SMTP settings.
+
+## 9. Acceptance checklist (flow)
+
+| Status | ID | Check | How to test |
+|--------|----|-------|-------------|
+| To do | AC-11 | A submitted request appears Pending supervisor for both sides | • Log in as `employee-1@budiman.com` / `password123` → `/employee`<br>• New request: type **Annual leave**, start = next Monday, end = next Tuesday, reason "family event", supervisor **Supervisor 1** → confirm → success message<br>• Your list shows it as **Pending supervisor**; log out, log in as `supervisor-1@budiman.com` → the same row is in their queue |
+| To do | AC-12 | Only same-division supervisors can be chosen, and the server checks too | • As employee-1 (Finance), the supervisor dropdown lists Supervisor 1 and Supervisor 2 only<br>• From DevTools, replay the submit action with a forged `supervisorId` (hr-1's id) → "Pick a supervisor from your own division" and no row is created |
+| To do | AC-13 | Signing sets Signed and offers the employee "Send to HR" | • As `supervisor-1@budiman.com`, **Sign** the row → confirm → success message, status **Signed**<br>• Log in as employee-1 → the row now offers **Send to HR** |
+| To do | AC-14 | Supervisor rejection needs a remark and the employee sees it | • As supervisor-1, **Reject** a Pending row leaving the remark empty → refused with "A remark is required when rejecting"<br>• Enter "team blackout that week", confirm → status **Rejected by supervisor**<br>• employee-1's list shows that remark |
+| To do | AC-15 | Send to HR; either officer decides; the decider is recorded | • As employee-1, **Send to HR** → status **Pending HR**<br>• Log in as `hr-2@budiman.com` → **Approve** → confirm → status **Approved**<br>• `npx prisma studio` → the row's `hrOfficerId` is hr-2's id and `decidedAt` is set |
+| To do | AC-16 | HR rejection needs a remark | • As `hr-1@budiman.com`, reject a Pending HR row with empty remark → refused<br>• With a remark → **Rejected by HR**; the remark is visible to the employee and to `admin@budiman.com` |
+| To do | AC-17 | Each role sees current + past with status and remarks — only its own scope | • employee-1 sees only their rows; supervisor-1 sees only rows routed to them; HR sees the whole queue and past decisions; Admin sees everything<br>• Log in as employee-1, type `/hr` in the address bar → bounced to `/employee` with "You are not allowed to view that page" |
+| To do | AC-18 | Every flow action: confirm first, success message after | • Walk all nine changing actions — Submit, Edit, Resubmit, Send to HR, Sign, Reject, Approve, Cancel and Withdraw: each pops a confirmation; dismissing it changes nothing; accepting shows the matching success banner (which string belongs to which action: design Reference E) |
+| To do | AC-19 | Nobody can act on someone else's request | • employee-1 submits a row; log in as supervisor-1 and invoke the sign action from DevTools with that row's forged id → refused with "You cannot act on that request" (design rule 13), row unchanged<br>• As hr-1, invoke approve on a **Pending supervisor** row → refused with "This request can no longer be changed" (wrong stage, design rule 5) |
+| To do | AC-20 | Cancel (undecided) and withdraw (Approved, before start) | • employee-1 cancels a Pending row → confirm → **Cancelled**<br>• Approve a row starting next month, then **Withdraw** → **Cancelled**<br>• An Approved row starting today cannot be withdrawn; a Cancelled row offers no actions |
+| To do | AC-21 | Edit pending; rejected → edit and resubmit | • Edit a **Pending supervisor** row's dates → saved, still Pending supervisor<br>• On a **Rejected by supervisor** row, **Edit & resubmit** with a fixed reason → status back to **Pending supervisor** (same row; original remark still visible) |
+| To do | AC-22 | Working-day and half-day counting; date rules | • Request Fri–Mon → shows **2 days**; Sat–Fri → **5 days**; single Wednesday → **1 day**<br>• Half-day (Morning, start = end = a Wednesday) → **0.5 days**<br>• End before start → "End date must be on or after start date"<br>• Dates last week → accepted (retroactive is allowed) |
+| To do | AC-23 | A supervisor's own leave skips the supervisor stage | • Log in as `supervisor-1@budiman.com`, submit an Annual request for themselves → status is **Pending HR** directly, no supervisor dropdown is offered<br>• hr-1/hr-2 see it in their queue; supervisor-1 has no sign/approve button for it |
+| To do | AC-24 | Admin sees everything and changes nothing | • `admin@budiman.com` → `/admin` lists all rows from every division with status and remarks, and **no action button anywhere**<br>• From DevTools, invoke any leave action while logged in as Admin → refused with "You cannot act on that request" (§13 gives the Admin no write actions) |
+| To do | AC-25 | Annual balance blocks over-requesting | • As employee-1 (entitlement 14), submit an Annual request of 14 working days → accepted<br>• Submit one more Annual day → "Not enough Annual leave days left"<br>• Cancel the 14-day row → the one extra day is then accepted<br>• Submit 20 days of Unpaid leave → accepted (uncapped) |
+| To do | AC-26 | Emails are logged in dev mode | • With no SMTP settings in `.env`: as employee-1, submit a request → the dev console prints `[email] to supervisor-1@budiman.com: New leave request …`<br>• As hr-2, approve it → the console prints `[email] to employee-1@budiman.com: Request approved …` |
+
+## 10. Not included (flow)
+
+- Doctor's certificate / any file upload — the document never asks for it; dropped from the interview plan. Re-add via FR-09 only if Budiman requests it
+- Admin management of leave types — document 5.3 rule 6 keeps the Admin view-only; the five types are a fixed seeded list (design Reference C)
+- Leave requests for HR staff — document 5.3 rule 2: only Employees submit (and, per L8, Supervisors for themselves)
+- Admin setting the annual entitlement — depends on U9 (Admin user management), whose spec is not yet written; the entitlement is the seeded 14 days for now
+- Public-holiday calendars, day carry-over, leave calendars, delegation while a supervisor is away, bulk sign/approve
+- Real SMTP delivery — emails log to the dev console until Budiman supplies mail settings (L13)
+- Push or in-app unread badges — the queues and lists are the notification
