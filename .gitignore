@@ -1,0 +1,20 @@
+# dependencies
+/node_modules
+
+# next.js build output and generated files
+/.next/
+/out/
+next-env.d.ts
+
+# environment files — SESSION_SECRET and DATABASE_URL must never be committed
+.env
+.env*.local
+
+# local database
+/prisma/*.db
+/prisma/*.db-journal
+
+# misc
+.DS_Store
+npm-debug.log*
+tsconfig.tsbuildinfo
