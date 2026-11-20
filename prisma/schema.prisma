@@ -1,0 +1,25 @@
+// Prisma schema for the Budiman HRMS Leave Request module.
+// The User table is defined in docs/specs/02-design.md §1 — change the
+// design spec first, then this file.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+/// One row per person who can log in.
+model User {
+  id           Int      @id @default(autoincrement())
+  name         String
+  icNumber     String   @unique // format xx-xxxxxx (design rule: never a login id)
+  email        String   @unique // work email, @budiman.com, lower-cased before storing
+  passwordHash String // bcrypt hash, never the plain password
+  role         String // Employee | Supervisor | HR | Admin (src/lib/auth/roles.ts)
+  division     String // one of the divisions in design Reference A
+  designation  String // job title from the division's list
+  createdAt    DateTime @default(now())
+}
