@@ -96,17 +96,17 @@ setting the annual entitlement (waits for U9's own spec).
 
 | Status | # | Task | Priority | Checks (from requirements §9) |
 |--------|---|------|----------|-------------------------------|
-| To do | 8 | Database: leave types, leave requests, annual entitlement | High | — (design §9; sets up AC-11 … AC-26) |
-| To do | 9 | Seed the five leave types and the entitlement | High | (sets up AC-11, AC-25) |
-| To do | 10 | Employee submits: form, own list, working-day/half-day count | High | AC-11, AC-12, AC-22 |
-| To do | 11 | Supervisor queue: sign and reject with remark | High | AC-13, AC-14 |
-| To do | 12 | Send to HR + HR queue: approve/reject, decider recorded, supervisor's own leave | High | AC-15, AC-16, AC-23 |
-| To do | 13 | Confirmations and success messages on every flow action | High | AC-18 |
-| To do | 14 | Employee tracking: edit, cancel, withdraw, resubmit | Medium | AC-17, AC-19, AC-20, AC-21 |
-| To do | 15 | Admin view-only list of every record | Medium | AC-24 |
-| To do | 16 | Annual leave balance cap | Low | AC-25 |
-| To do | 17 | Email notifications with dev-log fallback | Low | AC-26 |
-| To do | 18 | Flow security pass and full acceptance walk | High | AC-11 … AC-26 |
+| Done | 8 | Database: leave types, leave requests, annual entitlement | High | — (design §9; sets up AC-11 … AC-26) |
+| Done | 9 | Seed the five leave types and the entitlement | High | (sets up AC-11, AC-25) |
+| Done | 10 | Employee submits: form, own list, working-day/half-day count | High | AC-11, AC-12, AC-22 |
+| Done | 11 | Supervisor queue: sign and reject with remark | High | AC-13, AC-14 |
+| Done | 12 | Send to HR + HR queue: approve/reject, decider recorded, supervisor's own leave | High | AC-15, AC-16, AC-23 |
+| Done | 13 | Confirmations and success messages on every flow action | High | AC-18 |
+| Done | 14 | Employee tracking: edit, cancel, withdraw, resubmit | Medium | AC-17, AC-19, AC-20, AC-21 |
+| Done | 15 | Admin view-only list of every record | Medium | AC-24 |
+| Done | 16 | Annual leave balance cap | Low | AC-25 |
+| Done | 17 | Email notifications with dev-log fallback | Low | AC-26 |
+| Done | 18 | Flow security pass and full acceptance walk | High | AC-11 … AC-26 |
 
 ---
 
